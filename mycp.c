@@ -10,6 +10,8 @@
  *
  * Created on September 8, 2018, 7:15 PM
  */
+
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -30,14 +32,14 @@ int main(int argc, char** argv) {
     
     if (argc < 2) {
         printf("Please enter your 2 filenames and try again");
-        exit();
+        exit(1);
     }
     
     fileOneResult = access(argv[1], F_OK);
  
     if (fileOneResult == -1) {
         printf("File does not exist");
-        exit();
+        exit(1);
     }
     int fileOneOpen = open(argv[1], O_RDONLY);
     void *buffer = (char*) malloc(4096);
@@ -61,7 +63,7 @@ int main(int argc, char** argv) {
     }
     if (fileCopier==-1) {
         printf("error writiting to the file");
-        exit();
+        exit(1);
     }
     close(fileTwoOpen);
     free(buffer);
