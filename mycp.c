@@ -17,8 +17,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
-#define BUFFERSIZE 4096
+#include <string.h>
+#define BUFFERSIZE 1
 
 
 
@@ -27,9 +27,14 @@
  * 
  */
 int main(int argc, char** argv) {
-    int fileOneResult;
-    int fileTwoResult; 
-    
+    int fileOneResult; 
+    int fileOneContents;
+    int fileOneOpen;
+    int fileTwoOpen;
+    int fileCopier;
+    char buffer[BUFFERSIZE];
+    ssize_t bytesRead, bytesWritten;
+    mode_t mode = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH | S_IXOTH ;
     if (argc < 2) {
         printf("Please enter your 2 filenames and try again");
         exit(1);
@@ -41,32 +46,21 @@ int main(int argc, char** argv) {
         printf("File does not exist");
         exit(1);
     }
-    int fileOneOpen = open(argv[1], O_RDONLY);
-    void *buffer = (char*) malloc(4096);
-    int fileOneContents = read(fileOneOpen, buffer, BUFFERSIZE);
-    close(fileOneOpen);
+    fileOneOpen = open(argv[1], O_RDONLY);
     
-    fileTwoResult = access(argv[2], F_OK);
-    int fileTwoOpen;
+    fileTwoOpen = open(argv[2], O_CREAT | O_TRUNC | O_WRONLY, mode);
     
-    if (fileTwoResult == -1 ) {
-        printf("File already exists. Would you like to procede with copying? Press Y for yes.");
-        fileTwoOpen = open(argv[2], O_CREAT | O_WRONLY);
+    while (bytesRead = read(fileOneOpen, &buffer, BUFFERSIZE) > 0) {
+        bytesWritten = write(fileTwoOpen, &buffer, sizeof(buffer));
+        printf("%s", buffer);
+
     }
-    else {
-        fileTwoOpen = open(argv[2], O_WRONLY);
-    }
-    
-    int fileCopier;
-    while (fileOneContents = read(fileOneOpen, buffer, BUFFERSIZE) > 0) {
-        fileCopier = write(fileTwoOpen, buffer, BUFFERSIZE);
-    }
-    if (fileCopier==-1) {
+    if (bytesWritten==-1) {
         printf("error writiting to the file");
         exit(1);
     }
+    close(fileOneOpen);
     close(fileTwoOpen);
-    free(buffer);
     
     return (EXIT_SUCCESS);
 }
