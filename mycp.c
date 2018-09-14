@@ -1,16 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/* 
- * File:   main.c
- * Author: Tommy
- *
- * Created on September 8, 2018, 7:15 PM
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -28,37 +15,51 @@
  */
 int main(int argc, char** argv) {
     int fileOneResult; 
-    int fileOneContents;
+    int fileTwoResult;
     int fileOneOpen;
     int fileTwoOpen;
-    int fileCopier;
     char buffer[BUFFERSIZE];
+    char overwriteFile[128];
     ssize_t bytesRead, bytesWritten;
-    mode_t mode = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IROTH | S_IXOTH ;
+    mode_t mode = S_IRUSR | S_IWUSR | S_IXUSR ;
     if (argc < 2) {
-        printf("Please enter your 2 filenames and try again");
+        printf("Please enter your 2 filenames and try again\n");
         exit(1);
     }
     
     fileOneResult = access(argv[1], F_OK);
  
     if (fileOneResult == -1) {
-        printf("File does not exist");
+        printf("File does not exist\n");
         exit(1);
     }
     fileOneOpen = open(argv[1], O_RDONLY);
+    
+    fileTwoResult = access(argv[2], F_OK);
+
+    if (fileTwoResult != -1) {
+        printf("Output file already exists. Press y to overwrite?\n");
+        if(fgets(overwriteFile, 128 , stdin) != NULL) {
+        overwriteFile[strlen(overwriteFile)-1] = '\0';
+        if(strcmp(overwriteFile, "y")) {
+            printf("Understandable, have a nice day\n");
+            exit(1);
+        } 
+    }
+    }
     
     fileTwoOpen = open(argv[2], O_CREAT | O_TRUNC | O_WRONLY, mode);
     
     while (bytesRead = read(fileOneOpen, &buffer, BUFFERSIZE) > 0) {
         bytesWritten = write(fileTwoOpen, &buffer, sizeof(buffer));
-        printf("%s", buffer);
 
     }
     if (bytesWritten==-1) {
-        printf("error writiting to the file");
+        printf("error writing to the file\n");
         exit(1);
     }
+    
+    printf("File successfully copied!\n");
     close(fileOneOpen);
     close(fileTwoOpen);
     
